@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    <EditText
+        android:id="@+id/txt_type"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Type: Apple, Pear, etc."/>
+    <EditText
+        android:id="@+id/txt_subtype"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Variety: Jona, Bosc, etc."
+        android:layout_below="@+id/txt_type"/>
+    <EditText
+        android:id="@+id/txt_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Optional comments"
+        android:layout_below="@+id/txt_subtype"/>
+</RelativeLayout>
