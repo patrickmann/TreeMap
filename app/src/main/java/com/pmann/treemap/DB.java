@@ -1,6 +1,6 @@
 // Creating a DBHelper instance requires a Context. This is not always readily available, e.g. in
 // an AlertDialog. So we provide a global instance of the helper which we instantiate in the main
-// activity.
+// activity. Seems better than passing context all over the place.
 
 package com.pmann.treemap;
 

@@ -46,43 +46,58 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.d("TreeMap", "OnCreate");
+        Log.d(MapsActivity.APP_NAME, "OnCreate");
         db.execSQL(SQL_CREATE_TREES);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d("TreeMap", "OnUpgrade");
+        Log.d(MapsActivity.APP_NAME, "OnUpgrade");
         flushDB();
     }
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d("TreeMap", "OnDowngrade");
+        Log.d(MapsActivity.APP_NAME, "OnDowngrade");
     }
 
+    // Select the specified columns of a table into a cursor.
+    // We always include the row ID as the first column.
     public Cursor getValues(String tableName, String... colName) {
         SQLiteDatabase db = this.getReadableDatabase();
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT " + BaseColumns._ID);
         for (int i=0; i<colName.length; i++){
-            sb.append("," + colName[i]);
+            sb.append(",").append(colName[i]);
         }
-        sb.append(" FROM " + tableName);
+        sb.append(" FROM ").append(tableName);
 
         Cursor res = db.rawQuery(sb.toString(), null);
         res.moveToFirst();
         return res;
     }
 
+    public String getValue (String table, String column, long rowID){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("SELECT " + column + " FROM " + table + " WHERE " + BaseColumns._ID + "=" + rowID, null);
+        if (res.getCount() != 1)
+            return null;
+        res.moveToFirst();
+        String result = res.getString(0);
+        res.close();
+        return result;
+    }
+
     public boolean existsEntry(String table, String column, String value) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("SELECT * FROM " + table + " WHERE " + column + "=" + value, null);
-        return (res.getCount() > 0);
+        boolean fSuccess = (res.getCount() > 0);
+        res.close();
+        return fSuccess;
     }
 
-    public boolean insertTree(double pLat, double pLong, String pType, String pSubtype, String pComment, int pFlag) {
-        Log.d("TreeMap", "InsertTree");
+    public long insertTree(double pLat, double pLong, String pType, String pSubtype, String pComment, int pFlag) {
+        Log.d(MapsActivity.APP_NAME, "InsertTree");
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
@@ -94,10 +109,22 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         contentValues.put(COLUMN_FLAG, pFlag);
 
         // Insert the new row, returning the primary key value of the new row
-        long newRowId;
-        newRowId = db.insert(TABLE_TREES, null, contentValues);
+        return db.insert(TABLE_TREES, null, contentValues);
+    }
 
-        return (-1 != newRowId);
+    public boolean updateRow (String table, long rowID, String type, String subtype, String comment){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(DBHelper.COLUMN_TYPE, type);
+        values.put(DBHelper.COLUMN_SUBTYPE, subtype);
+        values.put(DBHelper.COLUMN_COMMENT, comment);
+
+        String selection = BaseColumns._ID + "=?";
+        String [] selectionArgs = {String.valueOf(rowID)};
+
+        int modifiedRows = db.update(table, values, selection, selectionArgs);
+        return (1 == modifiedRows);
     }
 
     public boolean deleteString(String table, String column, String value) {
@@ -117,7 +144,7 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         Cursor res = db.rawQuery("SELECT * FROM " + tableName, null);
 
         int nCols = res.getColumnCount();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         res.moveToFirst();
         while (!res.isAfterLast()) {
             for (int i = 0; i < nCols; i++) {
@@ -129,11 +156,11 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         }
         res.close();
 
-        Log.d("TreeMap", sb.toString());
+        Log.d(MapsActivity.APP_NAME, sb.toString());
     }
 
     public void populateDB() {
-        Log.d("TreeMap", "populateDB");
+        Log.d(MapsActivity.APP_NAME, "populateDB");
 
         insertTree(47.5588789, -122.2695519, "Apple", "Spitzenberg", "2015 bumper crop", 0);
         insertTree(47.5587872,-122.2692267, "Apple", "Winesap", "Come back next year for scion collection", 0);

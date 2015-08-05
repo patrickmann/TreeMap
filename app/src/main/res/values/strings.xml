@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">TreeMap</string>
     <string name="title_activity_maps">TreeMap</string>
+    <string name="add_new">Add new record</string>
+    <string name="hint_type">Type: Apple, Pear, etc.</string>
+    <string name="hint_subtype">Variety: Jona, Bosc, etc.</string>
+    <string name="hint_comment">Optional comments</string>
 </resources>
