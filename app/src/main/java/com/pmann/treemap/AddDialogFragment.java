@@ -15,8 +15,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.Marker;
-
 public class AddDialogFragment extends DialogFragment {
 
     @Override

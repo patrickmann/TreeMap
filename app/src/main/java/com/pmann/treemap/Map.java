@@ -4,7 +4,7 @@ package com.pmann.treemap;
 
 import android.database.Cursor;
 import android.location.Location;
-import android.support.v4.util.SimpleArrayMap;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -30,7 +30,7 @@ public class Map {
 
     // Map marker IDs to associated DB record IDs. This tells us which record to use when
     // operating on a given marker.
-    private static SimpleArrayMap<String, Long> mMarkerMap = null;
+    private static ArrayMap<String, Long> mMarkerMap = null;
     public static long getRowID(String pMarkerID) {
         long result = -1;
         if (mMarkerMap != null) {
@@ -50,7 +50,7 @@ public class Map {
                 .addConnectionCallbacks(mMapsActivity)
                 .addOnConnectionFailedListener(mMapsActivity)
                 .build();
-        mMarkerMap = new SimpleArrayMap<String, Long>();
+        mMarkerMap = new ArrayMap<String, Long>();
     }
 
     public void init (GoogleMap pMap){

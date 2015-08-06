@@ -5,4 +5,5 @@
     <string name="hint_type">Type: Apple, Pear, etc.</string>
     <string name="hint_subtype">Variety: Jona, Bosc, etc.</string>
     <string name="hint_comment">Optional comments</string>
+    <string name="Filter">Filter</string>
 </resources>

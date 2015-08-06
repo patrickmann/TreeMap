@@ -3,15 +3,13 @@
 
 package com.pmann.treemap;
 
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
+import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -23,7 +21,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.Marker;
 
-public class MapsActivity extends FragmentActivity
+public class MapsActivity extends Activity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener, GoogleMap.OnMarkerClickListener,
@@ -36,6 +34,24 @@ public class MapsActivity extends FragmentActivity
             Log.e("TreeMap", "Map not initialized");
         }
         return mMap;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        getMenuInflater().inflate(R.menu.maps_activity_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_filter:
+                return false; // allow action provider to receive this event
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
