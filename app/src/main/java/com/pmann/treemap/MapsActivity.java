@@ -48,17 +48,22 @@ public class MapsActivity extends Activity
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.action_filter:
-                return false; // allow action provider to receive this event
+                openFilter();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void openFilter(){
+        FilterDialogFragment dialog = new FilterDialogFragment();
+        dialog.show(getFragmentManager(), "FilterDialogFragment");
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-
 
         ImageButton btnAdd = (ImageButton) findViewById(R.id.btn_add);
         btnAdd.setOnClickListener(new View.OnClickListener() {

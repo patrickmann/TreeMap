@@ -17,6 +17,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
+
 public class Map {
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mMap;
@@ -30,15 +35,16 @@ public class Map {
 
     // Map marker IDs to associated DB record IDs. This tells us which record to use when
     // operating on a given marker.
-    private static ArrayMap<String, Long> mMarkerMap = null;
-    public static long getRowID(String pMarkerID) {
+    private static ArrayMap<Marker, Long> mMarkerMap = null;
+
+    public static long getRowID(Marker pMarker) {
         long result = -1;
         if (mMarkerMap != null) {
-            Long rowID = mMarkerMap.get(pMarkerID);
+            Long rowID = mMarkerMap.get(pMarker);
             if (rowID != null)
                 result = rowID;
             else
-                Log.e(MapsActivity.APP_NAME, "No DB record " + pMarkerID);
+                Log.e(MapsActivity.APP_NAME, "No DB record " + pMarker.getTitle());
         }
         return result;
     }
@@ -50,7 +56,7 @@ public class Map {
                 .addConnectionCallbacks(mMapsActivity)
                 .addOnConnectionFailedListener(mMapsActivity)
                 .build();
-        mMarkerMap = new ArrayMap<String, Long>();
+        mMarkerMap = new ArrayMap<Marker, Long>();
     }
 
     public void init (GoogleMap pMap){
@@ -85,7 +91,7 @@ public class Map {
                 .icon(BitmapDescriptorFactory.defaultMarker(Tree.hueByType(pType)))
                 .title(pType + ": " + pSubtype)
                 .snippet(pComment));
-        mMarkerMap.put(marker.getId(), pRowID); //associate DB ID with marker ID
+        mMarkerMap.put(marker, pRowID); //associate DB ID with marker ID
     }
 
     private void createMarkers(){
@@ -97,20 +103,6 @@ public class Map {
             addMarker(
                     cursor.getInt(0), cursor.getDouble(1), cursor.getDouble(2),
                     cursor.getString(3), cursor.getString(4), cursor.getString(5));
-
-/*
-            String strTitle = cursor.getString(3) + ": " + cursor.getString(4);
-            String strSnippet = cursor.getString(5);
-            float hue = Tree.hueByType(cursor.getString(3));
-            Marker marker = mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(cursor.getDouble(1), cursor.getDouble(2)))
-                    .icon(BitmapDescriptorFactory.defaultMarker(hue))
-                    .title(strTitle)
-                    .snippet(strSnippet));
-
-            mMarkerMap.put(marker.getId(), cursor.getInt(0)); //associate DB ID with marker ID
-*/
-
             cursor.moveToNext();
         }
         cursor.close();
@@ -118,6 +110,20 @@ public class Map {
 
     public Location getCurrentLocation () {
         return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+    }
+
+    public void setVisible(TreeSet<Long> rowIDs){
+        Set<java.util.Map.Entry<Marker, Long>> markers = mMarkerMap.entrySet();
+        for (java.util.Map.Entry<Marker, Long> entry: markers) {
+            Marker m = entry.getKey();
+            m.setVisible(rowIDs.contains(entry.getValue()));
+        }
+    }
+
+    public void showAll(){
+        for (Marker m: mMarkerMap.keySet()) {
+            m.setVisible(true);
+        }
     }
 
 }

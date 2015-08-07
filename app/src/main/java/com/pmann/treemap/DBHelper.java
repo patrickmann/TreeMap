@@ -77,23 +77,35 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return res;
     }
 
+    // Obtain a single column value for a given row ID
     public String getValue (String table, String column, long rowID){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("SELECT " + column + " FROM " + table + " WHERE " + BaseColumns._ID + "=" + rowID, null);
-        if (res.getCount() != 1)
+        if (res.getCount() != 1) {
+            res.close();
             return null;
+        }
         res.moveToFirst();
         String result = res.getString(0);
         res.close();
         return result;
     }
 
-    public boolean existsEntry(String table, String column, String value) {
+    // Determine whether one or more records match the specified column value
+    public boolean existsRecord(String table, String column, String value) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("SELECT * FROM " + table + " WHERE " + column + "=" + value, null);
         boolean fSuccess = (res.getCount() > 0);
         res.close();
         return fSuccess;
+    }
+
+    // Return row IDs of all records matching the given selection criteria
+    public Cursor selectRecords (String table, String criteria) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("SELECT " + BaseColumns._ID + " FROM " + table + " WHERE " + criteria, null);
+        res.moveToFirst();
+        return res;
     }
 
     public long insertTree(double pLat, double pLong, String pType, String pSubtype, String pComment, int pFlag) {

@@ -27,7 +27,7 @@ public class EditDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final long rowID = Map.getRowID(mMarker.getId());
+        final long rowID = Map.getRowID(mMarker);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();

@@ -3,6 +3,5 @@
     <item
         android:id="@+id/action_filter"
         android:title="@string/Filter"
-        android:actionProviderClass="com.pmann.treemap.FilterActionProvider"
-        android:showAsAction="ifRoom|collapseActionView" />
+        android:showAsAction="always|withText" />
 </menu>
