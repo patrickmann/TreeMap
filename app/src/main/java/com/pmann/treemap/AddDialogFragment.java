@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,24 +28,37 @@ public class AddDialogFragment extends DialogFragment {
         final TextView subtype = (TextView) dialogView.findViewById(R.id.txt_subtype);
         final TextView comment = (TextView) dialogView.findViewById(R.id.txt_comment);
 
-        builder.setView(dialogView)
-                .setTitle("Create New Entry")
+        final CheckBox cbShortlist = (CheckBox) dialogView.findViewById(R.id.chk_shortlist);
+        final CheckBox cbFollowup = (CheckBox) dialogView.findViewById(R.id.chk_followup);
+        final CheckBox cbHarvest = (CheckBox) dialogView.findViewById(R.id.chk_harvest);
+        final CheckBox cbPrune = (CheckBox) dialogView.findViewById(R.id.chk_prune);
+        final CheckBox cbScion = (CheckBox) dialogView.findViewById(R.id.chk_scion);
 
-                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+        builder.setView(dialogView)
+                .setTitle(R.string.create)
+
+                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         String newType = type.getText().toString();
                         String newSubtype = subtype.getText().toString();
                         String newComment = comment.getText().toString();
 
+                        int flag = 0;
+                        if (cbShortlist.isChecked()) flag |= DBHelper.MASK_SHORTLIST;
+                        if (cbFollowup.isChecked()) flag |= DBHelper.MASK_FOLLOWUP;
+                        if (cbHarvest.isChecked()) flag |= DBHelper.MASK_HARVEST;
+                        if (cbPrune.isChecked()) flag |= DBHelper.MASK_PRUNE;
+                        if (cbScion.isChecked()) flag |= DBHelper.MASK_SCION;
+
                         Location loc = MapsActivity.getMap().getCurrentLocation();
                         if (loc != null) {
                             double lat = loc.getLatitude();
                             double lng = loc.getLongitude();
-                            long newRowID = DB.helper().insertTree(lat, lng, newType, newSubtype, newComment, 0);
+                            long newRowID = DB.helper().insertTree(lat, lng, newType, newSubtype, newComment, flag);
 
                             if (newRowID != -1) {
                                 simpleToast("New record added");
-                                MapsActivity.getMap().addMarker(newRowID, lat, lng, newType, newSubtype, newComment);
+                                MapsActivity.getMap().addMarker(newRowID, lat, lng, newType, newSubtype, newComment, flag);
                             } else {
                                 simpleToast("Creation failed!");
                                 Log.e(MapsActivity.APP_NAME, "DB failure: insert");

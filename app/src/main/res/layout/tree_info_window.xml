@@ -11,7 +11,7 @@
         android:id="@+id/tv_title"
         android:layout_gravity="top|center_horizontal"
         android:textColor="@color/abc_primary_text_material_light"
-        android:textSize="16dp" />
+        android:textSize="16sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -19,11 +19,11 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Main text block"
         android:id="@+id/tv_body"
-        android:layout_gravity="top|left|center_horizontal"
+        android:layout_gravity="top|start|center_horizontal"
         android:textColor="@color/abc_primary_text_material_light"
         android:singleLine="false"
         android:width="150dp"
-        android:textSize="12dp" />
+        android:textSize="12sp" />
 
     <Button
         android:layout_width="wrap_content"
@@ -31,5 +31,5 @@
         android:text="Edit"
         android:id="@+id/btn_edit"
         android:layout_gravity="bottom|center_horizontal"
-        android:textSize="14dp" />
+        android:textSize="14sp" />
 </LinearLayout>

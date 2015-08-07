@@ -1,5 +1,14 @@
 // SQLite helper class. It takes care of the actual DB access and encapsulates things
 // like table and column names.
+//
+// Table columns are pretty self-explanatory, except FLAG, which is a 32-bit field that tracks up
+// to 32 boolean values per record. Semantics of the bit field are defined as:
+// Bit 1: short listed
+// Bit 2: flagged for follow up
+// Bit 3: needs harvesting
+// Bit 4: needs pruning
+// Bit 5: collect scion wood
+// Bit 6 ... : unassigned
 
 package com.pmann.treemap;
 
@@ -12,6 +21,12 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
+    public static final int MASK_SHORTLIST = 0x0001;
+    public static final int MASK_FOLLOWUP = 0x0002;
+    public static final int MASK_HARVEST = 0x0004;
+    public static final int MASK_PRUNE = 0x0008;
+    public static final int MASK_SCION = 0x0010;
+
     // If you change the database schema, you must increment the database version.
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "TreeMap.db";
@@ -77,8 +92,8 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return res;
     }
 
-    // Obtain a single column value for a given row ID
-    public String getValue (String table, String column, long rowID){
+    // Obtain a single string value for a given row ID
+    public String getStrValue(String table, String column, long rowID){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("SELECT " + column + " FROM " + table + " WHERE " + BaseColumns._ID + "=" + rowID, null);
         if (res.getCount() != 1) {
@@ -91,13 +106,18 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return result;
     }
 
-    // Determine whether one or more records match the specified column value
-    public boolean existsRecord(String table, String column, String value) {
+    // Obtain a single int value for a given row ID
+    public int getIntValue (String table, String column, long rowID){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery("SELECT * FROM " + table + " WHERE " + column + "=" + value, null);
-        boolean fSuccess = (res.getCount() > 0);
+        Cursor res = db.rawQuery("SELECT " + column + " FROM " + table + " WHERE " + BaseColumns._ID + "=" + rowID, null);
+        if (res.getCount() != 1) {
+            res.close();
+            return -1;
+        }
+        res.moveToFirst();
+        int result = res.getInt(0);
         res.close();
-        return fSuccess;
+        return result;
     }
 
     // Return row IDs of all records matching the given selection criteria
@@ -124,25 +144,20 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return db.insert(TABLE_TREES, null, contentValues);
     }
 
-    public boolean updateRow (String table, long rowID, String type, String subtype, String comment){
+    public boolean updateRow (String table, long rowID, String type, String subtype, String comment, int flag){
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(DBHelper.COLUMN_TYPE, type);
         values.put(DBHelper.COLUMN_SUBTYPE, subtype);
         values.put(DBHelper.COLUMN_COMMENT, comment);
+        values.put(DBHelper.COLUMN_FLAG, flag);
 
         String selection = BaseColumns._ID + "=?";
         String [] selectionArgs = {String.valueOf(rowID)};
 
         int modifiedRows = db.update(table, values, selection, selectionArgs);
         return (1 == modifiedRows);
-    }
-
-    public boolean deleteString(String table, String column, String value) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        int deletedRows = db.delete(table, "WHERE " + column + "=" + value, null);
-        return (1 == deletedRows);
     }
 
     public boolean deleteRow(String table, long rowID) {
@@ -174,9 +189,9 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
     public void populateDB() {
         Log.d(MapsActivity.APP_NAME, "populateDB");
 
-        insertTree(47.5588789, -122.2695519, "Apple", "Spitzenberg", "2015 bumper crop", 0);
-        insertTree(47.5587872,-122.2692267, "Apple", "Winesap", "Come back next year for scion collection", 0);
-        insertTree(47.5573659, -122.2729869, "Pear", "Seckel", "Very tasty aldf alsdkfj aldskfj aslfk lk l ladkjf l aldkfj  ladkf l aldkfj lak", 0);
+        insertTree(47.5588789, -122.2695519, "Apple", "Spitzenberg", "2015 bumper crop", 1);
+        insertTree(47.5587872,-122.2692267, "Apple", "Winesap", "Come back next year for scion collection", 3);
+        insertTree(47.5573659, -122.2729869, "Pear", "Seckel", "Very tasty aldf alsdkfj aldskfj aslfk lk l ladkjf l aldkfj  ladkf l aldkfj lak", 7);
     }
 
     public void flushDB() {

@@ -6,4 +6,10 @@
     <string name="hint_subtype">Variety: Jona, Bosc, etc.</string>
     <string name="hint_comment">Optional comments</string>
     <string name="Filter">Filter</string>
+    <string name="shortlist">My short list</string>
+    <string name="followup">Follow up visit</string>
+    <string name="harvest">Harvest</string>
+    <string name="prune">Needs pruning</string>
+    <string name="scion">Collect scion wood</string>
+    <string name="create">Create New Entry</string>
 </resources>

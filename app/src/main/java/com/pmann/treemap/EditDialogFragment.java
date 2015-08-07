@@ -11,10 +11,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.Marker;
+
+import java.util.ArrayList;
 
 
 public class EditDialogFragment extends DialogFragment {
@@ -37,9 +40,22 @@ public class EditDialogFragment extends DialogFragment {
         final TextView subtype = (TextView) dialogView.findViewById(R.id.txt_subtype);
         final TextView comment = (TextView) dialogView.findViewById(R.id.txt_comment);
 
-        type.setText(DB.helper().getValue(DBHelper.TABLE_TREES, DBHelper.COLUMN_TYPE, rowID));
-        subtype.setText(DB.helper().getValue(DBHelper.TABLE_TREES, DBHelper.COLUMN_SUBTYPE, rowID));
-        comment.setText(DB.helper().getValue(DBHelper.TABLE_TREES, DBHelper.COLUMN_COMMENT, rowID));
+        type.setText(DB.helper().getStrValue(DBHelper.TABLE_TREES, DBHelper.COLUMN_TYPE, rowID));
+        subtype.setText(DB.helper().getStrValue(DBHelper.TABLE_TREES, DBHelper.COLUMN_SUBTYPE, rowID));
+        comment.setText(DB.helper().getStrValue(DBHelper.TABLE_TREES, DBHelper.COLUMN_COMMENT, rowID));
+
+        final CheckBox cbShortlist = (CheckBox) dialogView.findViewById(R.id.chk_shortlist);
+        final CheckBox cbFollowup = (CheckBox) dialogView.findViewById(R.id.chk_followup);
+        final CheckBox cbHarvest = (CheckBox) dialogView.findViewById(R.id.chk_harvest);
+        final CheckBox cbPrune = (CheckBox) dialogView.findViewById(R.id.chk_prune);
+        final CheckBox cbScion = (CheckBox) dialogView.findViewById(R.id.chk_scion);
+
+        int flag = DB.helper().getIntValue(DBHelper.TABLE_TREES, DBHelper.COLUMN_FLAG, rowID);
+        if ((flag & DBHelper.MASK_SHORTLIST) > 0) cbShortlist.setChecked(true);
+        if ((flag & DBHelper.MASK_FOLLOWUP) > 0) cbFollowup.setChecked(true);
+        if ((flag & DBHelper.MASK_HARVEST) > 0) cbHarvest.setChecked(true);
+        if ((flag & DBHelper.MASK_PRUNE) > 0) cbPrune.setChecked(true);
+        if ((flag & DBHelper.MASK_SCION) > 0) cbScion.setChecked(true);
 
         builder.setView(dialogView)
                 .setTitle("Modify Entry")
@@ -61,7 +77,15 @@ public class EditDialogFragment extends DialogFragment {
                         String newType = type.getText().toString();
                         String newSubtype = subtype.getText().toString();
                         String newComment = comment.getText().toString();
-                        if (DB.helper().updateRow(DBHelper.TABLE_TREES, rowID, newType, newSubtype, newComment)) {
+
+                        int flag = 0;
+                        if (cbShortlist.isChecked()) flag |= DBHelper.MASK_SHORTLIST;
+                        if (cbFollowup.isChecked()) flag |= DBHelper.MASK_FOLLOWUP;
+                        if (cbHarvest.isChecked()) flag |= DBHelper.MASK_HARVEST;
+                        if (cbPrune.isChecked()) flag |= DBHelper.MASK_PRUNE;
+                        if (cbScion.isChecked()) flag |= DBHelper.MASK_SCION;
+
+                        if (DB.helper().updateRow(DBHelper.TABLE_TREES, rowID, newType, newSubtype, newComment, flag)) {
                             simpleToast("Record updated");
                             mMarker.setTitle(newType + ": " + newSubtype);
                             mMarker.setSnippet(newComment);

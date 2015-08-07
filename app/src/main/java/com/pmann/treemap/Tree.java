@@ -4,7 +4,10 @@ package com.pmann.treemap;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
+import java.util.HashMap;
+
 public class Tree {
+
     public static float hueByType(String pType) {
         switch (pType.toLowerCase()) {
             case "apple": return BitmapDescriptorFactory.HUE_MAGENTA;

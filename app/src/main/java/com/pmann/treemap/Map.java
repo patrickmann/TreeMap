@@ -17,8 +17,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -33,9 +31,13 @@ public class Map {
             .setFastestInterval(16)    // 16ms = 60fps
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-    // Map marker IDs to associated DB record IDs. This tells us which record to use when
+    // Map markers to associated DB record IDs. This tells us which record to use when
     // operating on a given marker.
     private static ArrayMap<Marker, Long> mMarkerMap = null;
+
+    // Map marker to flag value. This makes it easy to show and hide markers based on the
+    // flag settings.
+    private static ArrayMap<Marker, Integer> mFlagMap = null;
 
     public static long getRowID(Marker pMarker) {
         long result = -1;
@@ -49,7 +51,7 @@ public class Map {
         return result;
     }
 
-    public Map (MapsActivity pMapsActivity) {
+    public Map(MapsActivity pMapsActivity) {
         mMapsActivity = pMapsActivity;
         mGoogleApiClient = new GoogleApiClient.Builder(mMapsActivity)
                 .addApi(LocationServices.API)
@@ -57,9 +59,10 @@ public class Map {
                 .addOnConnectionFailedListener(mMapsActivity)
                 .build();
         mMarkerMap = new ArrayMap<Marker, Long>();
+        mFlagMap = new ArrayMap<Marker, Integer>();
     }
 
-    public void init (GoogleMap pMap){
+    public void init(GoogleMap pMap) {
         mMap = pMap;
         mMap.moveCamera(CameraUpdateFactory.zoomTo(14));
         mMap.setMyLocationEnabled(true);
@@ -77,51 +80,66 @@ public class Map {
                 mMapsActivity);
     }
 
-    public void connect (){
+    public void connect() {
         mGoogleApiClient.connect();
     }
 
-    public void disconnect (){
+    public void disconnect() {
         mGoogleApiClient.connect();
     }
 
-    public void addMarker(long pRowID, double pLat, double pLng, String pType, String pSubtype, String pComment){
+    public void addMarker(
+            long pRowID, double pLat, double pLng, String pType, String pSubtype, String pComment, int pFlag) {
         Marker marker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(pLat, pLng))
                 .icon(BitmapDescriptorFactory.defaultMarker(Tree.hueByType(pType)))
                 .title(pType + ": " + pSubtype)
                 .snippet(pComment));
-        mMarkerMap.put(marker, pRowID); //associate DB ID with marker ID
+        mMarkerMap.put(marker, pRowID); //associate DB ID with marker reference
+        mFlagMap.put(marker, pFlag);    //save flag value for efficient filtering
     }
 
-    private void createMarkers(){
+    private void createMarkers() {
         Cursor cursor = DB.helper().getValues(
                 DBHelper.TABLE_TREES, DBHelper.COLUMN_LAT, DBHelper.COLUMN_LONG,
-                DBHelper.COLUMN_TYPE, DBHelper.COLUMN_SUBTYPE, DBHelper.COLUMN_COMMENT);
+                DBHelper.COLUMN_TYPE, DBHelper.COLUMN_SUBTYPE, DBHelper.COLUMN_COMMENT, DBHelper.COLUMN_FLAG);
 
         while (!cursor.isAfterLast()) {
             addMarker(
                     cursor.getInt(0), cursor.getDouble(1), cursor.getDouble(2),
-                    cursor.getString(3), cursor.getString(4), cursor.getString(5));
+                    cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getInt(6));
             cursor.moveToNext();
         }
         cursor.close();
     }
 
-    public Location getCurrentLocation () {
+    public Location getCurrentLocation() {
         return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
-    public void setVisible(TreeSet<Long> rowIDs){
+    public void setVisible(TreeSet<Long> rowIDs) {
+        if (rowIDs == null) return; // ignore - probably a result of a typo in the entry form
+
         Set<java.util.Map.Entry<Marker, Long>> markers = mMarkerMap.entrySet();
-        for (java.util.Map.Entry<Marker, Long> entry: markers) {
+        for (java.util.Map.Entry<Marker, Long> entry : markers) {
             Marker m = entry.getKey();
             m.setVisible(rowIDs.contains(entry.getValue()));
         }
     }
 
-    public void showAll(){
-        for (Marker m: mMarkerMap.keySet()) {
+    public void setVisible (int flagFilter) {
+        if (flagFilter == 0 || flagFilter == 0xFFFF) return;
+
+        Set<java.util.Map.Entry<Marker, Integer>> markers = mFlagMap.entrySet();
+        for (java.util.Map.Entry<Marker, Integer> entry : markers) {
+            Marker m = entry.getKey();
+            int f = entry.getValue();
+            m.setVisible((f & flagFilter) != 0);
+        }
+    }
+
+    public void showAll() {
+        for (Marker m : mMarkerMap.keySet()) {
             m.setVisible(true);
         }
     }

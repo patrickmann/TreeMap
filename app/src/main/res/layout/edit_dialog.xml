@@ -1,22 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <EditText
         android:id="@+id/txt_type"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Type: Apple, Pear, etc."/>
+        android:hint="@string/hint_type" />
+
     <EditText
         android:id="@+id/txt_subtype"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Variety: Jona, Bosc, etc."
-        android:layout_below="@+id/txt_type"/>
+        android:hint="@string/hint_subtype" />
+
     <EditText
         android:id="@+id/txt_comment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Optional comments"
-        android:layout_below="@+id/txt_subtype"/>
-</RelativeLayout>
+        android:hint="@string/hint_comment" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10sp"
+        android:orientation="vertical">
+
+        <CheckBox
+            android:id="@+id/chk_shortlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/shortlist" />
+
+        <CheckBox
+            android:id="@+id/chk_followup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/followup" />
+
+        <CheckBox
+            android:id="@+id/chk_harvest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/harvest" />
+
+        <CheckBox
+            android:id="@+id/chk_prune"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/prune" />
+
+        <CheckBox
+            android:id="@+id/chk_scion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/scion" />
+
+    </LinearLayout>
+</LinearLayout>
