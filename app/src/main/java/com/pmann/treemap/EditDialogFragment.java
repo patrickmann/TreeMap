@@ -15,10 +15,8 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
-
-import java.util.ArrayList;
-
 
 public class EditDialogFragment extends DialogFragment {
 
@@ -89,6 +87,7 @@ public class EditDialogFragment extends DialogFragment {
                             simpleToast("Record updated");
                             mMarker.setTitle(newType + ": " + newSubtype);
                             mMarker.setSnippet(newComment);
+                            mMarker.setIcon(BitmapDescriptorFactory.defaultMarker(Tree.hueByType(newType)));
                         } else {
                             simpleToast("Update failed!");
                             Log.e(MapsActivity.APP_NAME, "DB failure: update");

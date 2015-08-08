@@ -4,18 +4,21 @@ package com.pmann.treemap;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
-import java.util.HashMap;
-
 public class Tree {
 
+    private static String[] mStandardTrees =
+            {"apple", "cherry", "crabapple", "fig", "filbert", "grape", "loquat",
+                    "peach", "pear", "persimmon", "plum", "quince"};
+    private static int mHueMultiplier = 360 / mStandardTrees.length;
+
     public static float hueByType(String pType) {
-        switch (pType.toLowerCase()) {
-            case "apple": return BitmapDescriptorFactory.HUE_MAGENTA;
-            case "pear": return BitmapDescriptorFactory.HUE_GREEN;
-            case "plum": return BitmapDescriptorFactory.HUE_VIOLET;
-            case "cherry": return BitmapDescriptorFactory.HUE_RED;
-            case "fig":  return BitmapDescriptorFactory.HUE_CYAN;
-            default: return BitmapDescriptorFactory.HUE_YELLOW;
+        for  (int i=0; i < mStandardTrees.length; i++) {
+            if (pType.equalsIgnoreCase(mStandardTrees[i])) {
+                return (float) i * mHueMultiplier;
+            }
         }
+        return BitmapDescriptorFactory.HUE_YELLOW;
     }
 }
+
+

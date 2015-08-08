@@ -1,3 +1,6 @@
+// TreeMap: a simple location-aware app that helps identify, locate, and manage trees in the
+// urban environment.
+//
 // Main Activity of the application. This class registers all the necessary callback interfaces
 // for the Google maps UI. The actual implementation is delegated to other classes.
 
@@ -81,7 +84,7 @@ public class MapsActivity extends Activity
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        resetDB();
+        //resetDB();
         dumpDB();
     }
 
@@ -103,6 +106,7 @@ public class MapsActivity extends Activity
     }
 
     @Override
+    // Must implement onLocationChanged or the class will be abstract
     public void onLocationChanged(Location location) {
 //        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));

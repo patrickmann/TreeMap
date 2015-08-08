@@ -1,11 +1,16 @@
 <resources>
     <string name="app_name">TreeMap</string>
     <string name="title_activity_maps">TreeMap</string>
+
     <string name="add_new">Add new record</string>
+    <string name="edit">Edit</string>
+
     <string name="hint_type">Type: Apple, Pear, etc.</string>
     <string name="hint_subtype">Variety: Jona, Bosc, etc.</string>
     <string name="hint_comment">Optional comments</string>
+
     <string name="Filter">Filter</string>
+    <string name="all">[Set all]</string>
     <string name="shortlist">My short list</string>
     <string name="followup">Follow up visit</string>
     <string name="harvest">Harvest</string>

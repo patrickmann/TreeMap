@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import java.util.ArrayList;
@@ -21,11 +20,7 @@ import java.util.TreeSet;
 
 public class FilterDialogFragment extends DialogFragment {
     private ArrayList<CheckBox> mChkBoxList;
-
-    private static int mFlagFilter = 0;
-    public static int getFlagFilter() {
-        return mFlagFilter;
-    }
+    private int mFlagFilter = 0;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
