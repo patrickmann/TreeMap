@@ -4,9 +4,9 @@ android {
     signingConfigs {
         config {
             keyAlias 'patrickmann'
-            keyPassword 'm00sl0ch'
             storeFile file('C:/Users/patri_000/AndroidStudioProjects/keystores/android.jks')
-            storePassword 'm00sl0ch'
+            storePassword System.getenv("KSTOREPWD")
+            keyPassword System.getenv("KEYPWD")
         }
     }
     compileSdkVersion 22
