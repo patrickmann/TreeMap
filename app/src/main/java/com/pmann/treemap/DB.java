@@ -7,7 +7,7 @@ package com.pmann.treemap;
 import android.util.Log;
 import android.content.Context;
 
-public class DB {
+class DB {
     private static DBHelper mDBHelper = null;
 
     public static void init(Context context) {

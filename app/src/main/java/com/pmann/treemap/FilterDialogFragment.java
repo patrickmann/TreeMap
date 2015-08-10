@@ -3,6 +3,7 @@
 
 package com.pmann.treemap;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -26,7 +27,9 @@ public class FilterDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.filter_dialog, null);
+
+        //Since this is a dialog it's OK to pass null as the root parameter
+        @SuppressLint("InflateParams") View dialogView = inflater.inflate(R.layout.filter_dialog, null);
 
         final EditText txtType = (EditText) dialogView.findViewById(R.id.txt_type);
         final EditText txtSubtype = (EditText) dialogView.findViewById(R.id.txt_subtype);
@@ -48,7 +51,7 @@ public class FilterDialogFragment extends DialogFragment {
                                 Log.d(MapsActivity.APP_NAME, criteria.toString());
                                 if (criteria.length() > 0) {
                                     Cursor res = DB.helper().selectRecords(DBHelper.TABLE_TREES, criteria.toString());
-                                    TreeSet<Long> rowIDs = new TreeSet<Long>();
+                                    TreeSet<Long> rowIDs = new TreeSet<>();
                                     while (!res.isAfterLast()) {
                                         rowIDs.add(res.getLong(0));
                                         res.moveToNext();
@@ -77,7 +80,7 @@ public class FilterDialogFragment extends DialogFragment {
 
     private void initializeCheckboxes(View view) {
         CheckBox cb;
-        mChkBoxList = new ArrayList<CheckBox>();
+        mChkBoxList = new ArrayList<>();
         View.OnClickListener listener = new FilterListener();
 
         cb = (CheckBox) view.findViewById(R.id.chk_all);
@@ -104,7 +107,7 @@ public class FilterDialogFragment extends DialogFragment {
         mChkBoxList.add(cb);
     }
 
-    class FilterListener implements View.OnClickListener {
+    private class FilterListener implements View.OnClickListener {
         public void onClick(View view) {
             boolean checked = ((CheckBox) view).isChecked();
 

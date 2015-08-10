@@ -20,6 +20,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+@SuppressWarnings({"SameParameterValue", "SpellCheckingInspection"})
 public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
     public static final int MASK_SHORTLIST = 0x0001;
     public static final int MASK_FOLLOWUP = 0x0002;
@@ -28,8 +29,8 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
     public static final int MASK_SCION = 0x0010;
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "TreeMap.db";
+    private static final int DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME = "TreeMap.db";
 
     public static final String TABLE_TREES = "trees";
     public static final String COLUMN_LAT = "lat";
@@ -38,6 +39,7 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
     public static final String COLUMN_SUBTYPE = "subtype";
     public static final String COLUMN_COMMENT = "comment";
     public static final String COLUMN_FLAG = "flag";
+    @SuppressWarnings("WeakerAccess")
     public static final String COLUMN_DATE = "date";
 
     private static final String SQL_CREATE_TREES =
@@ -82,8 +84,8 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         SQLiteDatabase db = this.getReadableDatabase();
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT " + BaseColumns._ID);
-        for (int i=0; i<colName.length; i++){
-            sb.append(",").append(colName[i]);
+        for (String c : colName){
+            sb.append(",").append(c);
         }
         sb.append(" FROM ").append(tableName);
 

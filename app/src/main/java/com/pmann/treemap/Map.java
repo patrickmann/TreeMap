@@ -21,14 +21,14 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class Map {
-    private GoogleApiClient mGoogleApiClient;
+    final private GoogleApiClient mGoogleApiClient;
+    final private MapsActivity mMapsActivity;
     private GoogleMap mMap;
-    private MapsActivity mMapsActivity;
 
     // These settings will give you updates at the maximal rates currently possible
     private static final LocationRequest REQUEST = LocationRequest.create()
-            .setInterval(5000)         // 5 seconds
-            .setFastestInterval(16)    // 16ms = 60fps
+            .setInterval(10000)         // 10 seconds
+            .setFastestInterval(500)    // 500ms
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
     // Map markers to associated DB record IDs. This tells us which record to use when
@@ -58,13 +58,14 @@ public class Map {
                 .addConnectionCallbacks(mMapsActivity)
                 .addOnConnectionFailedListener(mMapsActivity)
                 .build();
-        mMarkerMap = new ArrayMap<Marker, Long>();
-        mFlagMap = new ArrayMap<Marker, Integer>();
+        mMarkerMap = new ArrayMap<>();
+        mFlagMap = new ArrayMap<>();
     }
 
     public void init(GoogleMap pMap) {
         mMap = pMap;
         mMap.moveCamera(CameraUpdateFactory.zoomTo(14));
+
         mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
         mMap.setInfoWindowAdapter(new TreeInfoWindow(mMapsActivity.getApplicationContext()));
@@ -73,6 +74,8 @@ public class Map {
         createMarkers();
     }
 
+    // Call this to receive continuous location updates via the MapsActivity.onLocationChanged() callback
+    @SuppressWarnings("unused")
     public void requestLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient,
@@ -117,6 +120,14 @@ public class Map {
         return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
+    public void moveToLastLocation() {
+        Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (loc != null)
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(loc.getLatitude(), loc.getLongitude())));
+        else
+            Log.e(MapsActivity.APP_NAME, "getLastLocation() failed");
+    }
+
     public void setVisible(TreeSet<Long> rowIDs) {
         if (rowIDs == null) return; // ignore - probably a result of a typo in the entry form
 
@@ -127,7 +138,7 @@ public class Map {
         }
     }
 
-    public void setVisible (int flagFilter) {
+    public void setVisible(int flagFilter) {
         if (flagFilter == 0 || flagFilter == 0xFFFF) return;
 
         Set<java.util.Map.Entry<Marker, Integer>> markers = mFlagMap.entrySet();

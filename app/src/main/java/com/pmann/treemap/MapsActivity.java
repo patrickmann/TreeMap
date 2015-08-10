@@ -106,15 +106,16 @@ public class MapsActivity extends Activity
     }
 
     @Override
-    // Must implement onLocationChanged or the class will be abstract
+    // In order to receive location updates, call requestLocationUpdates() in the
+    // onConnected() method.
     public void onLocationChanged(Location location) {
-//        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-//        Log.d(APP_NAME, location.toString());
     }
 
     public void onConnected(Bundle connectionHint) {
-        mMap.requestLocationUpdates();
+//      If we need to track location continuously, request location updates here
+//      mMap.requestLocationUpdates();
+
+        mMap.moveToLastLocation();
     }
 
     public boolean onMarkerClick(Marker marker) {
@@ -138,6 +139,7 @@ public class MapsActivity extends Activity
         Toast.makeText(this, "Connection Failed", Toast.LENGTH_SHORT).show();
     }
 
+    @SuppressWarnings("unused")
     public void resetDB() {
         DB.helper().flushDB();
         DB.helper().populateDB();

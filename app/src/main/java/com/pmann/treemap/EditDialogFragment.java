@@ -3,6 +3,7 @@
 
 package com.pmann.treemap;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -32,7 +33,9 @@ public class EditDialogFragment extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.edit_dialog, null);
+
+        //Since this is a dialog it's OK to pass null as the root parameter
+        @SuppressLint("InflateParams") View dialogView = inflater.inflate(R.layout.edit_dialog, null);
 
         final TextView type = (TextView) dialogView.findViewById(R.id.txt_type);
         final TextView subtype = (TextView) dialogView.findViewById(R.id.txt_subtype);

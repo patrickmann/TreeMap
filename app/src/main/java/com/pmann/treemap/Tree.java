@@ -4,12 +4,13 @@ package com.pmann.treemap;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
-public class Tree {
+class Tree {
 
-    private static String[] mStandardTrees =
+    @SuppressWarnings("SpellCheckingInspection")
+    final private static String[] mStandardTrees =
             {"apple", "cherry", "crabapple", "fig", "filbert", "grape", "loquat",
                     "peach", "pear", "persimmon", "plum", "quince"};
-    private static int mHueMultiplier = 360 / mStandardTrees.length;
+    final private static int mHueMultiplier = 360 / mStandardTrees.length;
 
     public static float hueByType(String pType) {
         for  (int i=0; i < mStandardTrees.length; i++) {
