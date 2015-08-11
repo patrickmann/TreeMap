@@ -117,7 +117,10 @@ public class Map {
     }
 
     public Location getCurrentLocation() {
-        return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (loc == null)
+            Log.e(MapsActivity.APP_NAME, "Failed to get location");
+        return loc;
     }
 
     public void moveToLastLocation() {

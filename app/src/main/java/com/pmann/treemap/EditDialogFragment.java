@@ -8,21 +8,24 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 public class EditDialogFragment extends DialogFragment {
+    private Location mLoc;
 
     private Marker mMarker;
-
     public void setMarker(Marker pMarker) {
         mMarker = pMarker;
     }
@@ -57,6 +60,28 @@ public class EditDialogFragment extends DialogFragment {
         if ((flag & DBHelper.MASK_HARVEST) > 0) cbHarvest.setChecked(true);
         if ((flag & DBHelper.MASK_PRUNE) > 0) cbPrune.setChecked(true);
         if ((flag & DBHelper.MASK_SCION) > 0) cbScion.setChecked(true);
+
+        // The Re-Locate button updates the stored location with the current location. This
+        // is handy if your initial location wasn't accurate enough - no need to delete and
+        // recreate the entire record.
+        final Button btn_relocate = (Button) dialogView.findViewById(R.id.btn_relocate);
+        btn_relocate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mLoc = MapsActivity.getMap().getCurrentLocation();
+                if (mLoc != null) {
+                    double lat = mLoc.getLatitude();
+                    double lng = mLoc.getLongitude();
+                    if (DB.helper().updateRow(DBHelper.TABLE_TREES, rowID, lat, lng)) {
+                        simpleToast("Location updated");
+                        mMarker.setPosition(new LatLng(lat, lng));
+                    } else {
+                        simpleToast("Update failed!");
+                        Log.e(MapsActivity.APP_NAME, "DB failure: location update");
+                    }
+                }
+            }
+        });
 
         builder.setView(dialogView)
                 .setTitle("Modify Entry")

@@ -162,6 +162,20 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return (1 == modifiedRows);
     }
 
+    public boolean updateRow (String table, long rowID, double lat, double lng){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(DBHelper.COLUMN_LAT, lat);
+        values.put(DBHelper.COLUMN_LONG, lng);
+
+        String selection = BaseColumns._ID + "=?";
+        String [] selectionArgs = {String.valueOf(rowID)};
+
+        int modifiedRows = db.update(table, values, selection, selectionArgs);
+        return (1 == modifiedRows);
+    }
+
     public boolean deleteRow(String table, long rowID) {
         SQLiteDatabase db = this.getWritableDatabase();
         int deletedRows = db.delete(table, "_id=" + rowID, null);

@@ -17,4 +17,5 @@
     <string name="prune">Needs pruning</string>
     <string name="scion">Collect scion wood</string>
     <string name="create">Create New Entry</string>
+    <string name="relocate">Re-Locate</string>
 </resources>
