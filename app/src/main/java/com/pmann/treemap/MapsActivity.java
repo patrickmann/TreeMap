@@ -1,9 +1,3 @@
-// TreeMap: a simple location-aware app that helps identify, locate, and manage trees in the
-// urban environment.
-//
-// Main Activity of the application. This class registers all the necessary callback interfaces
-// for the Google maps UI. The actual implementation is delegated to other classes.
-
 package com.pmann.treemap;
 
 import android.app.Activity;
@@ -24,6 +18,22 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.Marker;
 
+/**
+ * <h1>TreeMap</h1>
+ * <p>A simple location-aware app that helps identify, locate, and manage trees in the
+ * urban environment.</p>
+ * <ul>
+ * <li>Create record of tree at current location</li>
+ * <li>Store and edit information about tree</li>
+ * <li>Set flags to track related activities</li>
+ * <li>Display a filtered map view, based on user-defined criteria</li>
+ * </ul>
+ * <p>
+ * Main Activity of the application. This class initializes the Google maps UI and registers all
+ * the necessary callback interfaces.</p>
+ *
+ * @author Patrick Mann
+ */
 public class MapsActivity extends Activity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -32,6 +42,14 @@ public class MapsActivity extends Activity
     public static final String APP_NAME = "TreeMap";
 
     private static Map mMap = null;
+
+    /**
+     * The app uses a singleton instance of the Map class - there is only one instance
+     * of the Google Maps UI and we need to interact with it at various places throughout
+     * the app. It's cleaner to have a global accessor than to pass it around as a parameter.
+     *
+     * @return Map class singleton or null if not yet initialized
+     */
     public static Map getMap() {
         if (mMap == null) {
             Log.e("TreeMap", "Map not initialized");
@@ -58,7 +76,7 @@ public class MapsActivity extends Activity
         }
     }
 
-    private void openFilter(){
+    private void openFilter() {
         FilterDialogFragment dialog = new FilterDialogFragment();
         dialog.show(getFragmentManager(), "FilterDialogFragment");
     }
@@ -78,31 +96,33 @@ public class MapsActivity extends Activity
         });
 
         DB.init(this);
-        mMap = new Map(this);
 
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //resetDB();
-        dumpDB();
+        //resetDB();    //erase and recreate DB with test data
+        dumpDB();       //dump contents of DB to log file
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mMap.connect();
+        if (mMap != null) // map may not yet be initialized
+            mMap.connect();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mMap.disconnect();
+        if (mMap != null) // map may not yet be initialized
+            mMap.disconnect();
     }
 
     @Override
     public void onMapReady(GoogleMap pMap) {
-        mMap.init(pMap);
+        Log.d(APP_NAME,"onMapReady()");
+        mMap = new Map(this, pMap);
     }
 
     @Override
@@ -111,17 +131,35 @@ public class MapsActivity extends Activity
     public void onLocationChanged(Location location) {
     }
 
+    /**
+     * This is where you would request continuous location updates via
+     * {@code mMap.requestLocationUpdates()}. We don't do it to reduce battery usage.
+     * @param connectionHint
+     */
     public void onConnected(Bundle connectionHint) {
-//      If we need to track location continuously, request location updates here
+        Log.d(APP_NAME,"onConnected()");
 //      mMap.requestLocationUpdates();
-
         mMap.moveToLastLocation();
     }
 
+    /**
+     * Called when user clicks on a map marker. We rely on the standard info window UI,
+     * so we return false here.
+     *
+     * @param marker that was clicked on
+     * @return true, if event was consumed; false if we want the info window to pop up
+     */
     public boolean onMarkerClick(Marker marker) {
-        return false; //event not consumed - pop up the info window
+        return false;
     }
 
+    /**
+     * Called when user clicks anywhere on the info window of a map marker.
+     * <p>In this app we understand that to mean that the user wishes to modify or
+     * delete the related DB record.</p>
+     *
+     * @param marker
+     */
     public void onInfoWindowClick(Marker marker) {
         marker.hideInfoWindow();
         EditDialogFragment dialog = new EditDialogFragment();
@@ -140,13 +178,18 @@ public class MapsActivity extends Activity
     }
 
     @SuppressWarnings("unused")
+    /**
+     * Erase and recreate the DB with test data. Be careful!
+     */
     public void resetDB() {
         DB.helper().flushDB();
         DB.helper().populateDB();
     }
 
+    /**
+     * Dump the entire contents of the DB to the log
+     */
     private void dumpDB() {
         DB.helper().dumpTable(DBHelper.TABLE_TREES);
     }
-
 }

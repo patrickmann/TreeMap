@@ -1,6 +1,3 @@
-// Dialog for entering filter criteria. Visibility of map markers is updated based on the
-// active filter criteria. Filtering persists until the filter is explicitly reset.
-
 package com.pmann.treemap;
 
 import android.annotation.SuppressLint;
@@ -19,6 +16,10 @@ import android.widget.EditText;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
+/**
+ * Dialog for entering filter criteria. Visibility of map markers is updated based on the
+ * active filter criteria. Filtering persists until the filter is explicitly reset.
+ */
 public class FilterDialogFragment extends DialogFragment {
     private ArrayList<CheckBox> mChkBoxList;
     private int mFlagFilter = 0;

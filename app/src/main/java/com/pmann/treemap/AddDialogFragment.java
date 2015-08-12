@@ -1,6 +1,3 @@
-// This dialog opens when the user taps on the 'add marker' button. The user can enter
-// information to populate the new record, or abort if it was an inadvertent click.
-
 package com.pmann.treemap;
 
 import android.annotation.SuppressLint;
@@ -17,6 +14,10 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * This dialog opens when the user taps on the 'add marker' button. The user can enter
+ * information to populate the new record, or abort if it was an inadvertent click.
+ */
 public class AddDialogFragment extends DialogFragment {
 
     @Override

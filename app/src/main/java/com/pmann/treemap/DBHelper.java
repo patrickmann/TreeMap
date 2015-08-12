@@ -1,15 +1,3 @@
-// SQLite helper class. It takes care of the actual DB access and encapsulates things
-// like table and column names.
-//
-// Table columns are pretty self-explanatory, except FLAG, which is a 32-bit field that tracks up
-// to 32 boolean values per record. Semantics of the bit field are defined as:
-// Bit 1: short listed
-// Bit 2: flagged for follow up
-// Bit 3: needs harvesting
-// Bit 4: needs pruning
-// Bit 5: collect scion wood
-// Bit 6 ... : unassigned
-
 package com.pmann.treemap;
 
 import android.content.ContentValues;
@@ -21,7 +9,23 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 @SuppressWarnings({"SameParameterValue", "SpellCheckingInspection"})
-public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
+
+/**
+ * <p>SQLite helper class. It takes care of the actual DB access and encapsulates things
+ * like table and column names.</p>
+ * <p>
+ * Table columns are pretty self-explanatory, except FLAG, which is a 32-bit field that tracks up
+ * to 32 boolean values per record. Semantics of the bit field are defined as:</p>
+ * <ul>
+ * <li>Bit 1: short listed</li>
+ * <li>Bit 2: flagged for follow up</li>
+ * <li>Bit 3: needs harvesting</li>
+ * <li>Bit 4: needs pruning</li>
+ * <li>Bit 5: collect scion wood</li>
+ * <li>Bit 6 ... : unassignedpublic</li>
+ * </ul>
+ */
+class DBHelper extends SQLiteOpenHelper implements BaseColumns {
     public static final int MASK_SHORTLIST = 0x0001;
     public static final int MASK_FOLLOWUP = 0x0002;
     public static final int MASK_HARVEST = 0x0004;
@@ -30,8 +34,10 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
 
     // If you change the database schema, you must increment the database version.
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "TreeMap.db";
 
+    // String constants for DB access. These are not localizable or related to the view, so
+    // they don't belong in the string resource file.
+    private static final String DATABASE_NAME = "TreeMap.db";
     public static final String TABLE_TREES = "trees";
     public static final String COLUMN_LAT = "lat";
     public static final String COLUMN_LONG = "long";
@@ -61,25 +67,45 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    /**
+     * Create the DB tables, if they don't already exist
+     * @param db
+     */
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.d(MapsActivity.APP_NAME, "OnCreate");
         db.execSQL(SQL_CREATE_TREES);
     }
 
+    /**
+     * Take appropriate action when the app indicates it is using a newer version of the DB.
+     * @param db
+     * @param oldVersion
+     * @param newVersion
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(MapsActivity.APP_NAME, "OnUpgrade");
         flushDB();
     }
 
+    /**
+     * Take appropriate action when the app indicates it is using an older version of the DB.
+     * @param db
+     * @param oldVersion
+     * @param newVersion
+     */
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(MapsActivity.APP_NAME, "OnDowngrade");
     }
 
-    // Select the specified columns of a table into a cursor.
-    // We always include the row ID as the first column.
+    /**
+     * Select the specified columns of a table into a cursor. We always include the row ID as the first column.
+     * @param tableName
+     * @param colName a variable number of column names that are to be included
+     * @return a cursor for the selected data
+     */
     public Cursor getValues(String tableName, String... colName) {
         SQLiteDatabase db = this.getReadableDatabase();
         StringBuilder sb = new StringBuilder();
@@ -94,7 +120,13 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return res;
     }
 
-    // Obtain a single string value for a given row ID
+    /**
+     * Obtain a single string value for a given row ID
+     * @param table
+     * @param column get value from this column
+     * @param rowID get value from this record
+     * @return desired string value or null, if it could not be retrieved
+     */
     public String getStrValue(String table, String column, long rowID){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("SELECT " + column + " FROM " + table + " WHERE " + BaseColumns._ID + "=" + rowID, null);
@@ -108,7 +140,13 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return result;
     }
 
-    // Obtain a single int value for a given row ID
+    /**
+     * Obtain a single int value for a given row ID
+     * @param table
+     * @param column get value from this column
+     * @param rowID get value from this record
+     * @return desired int value or -1, if it could not be retrieved
+     */
     public int getIntValue (String table, String column, long rowID){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("SELECT " + column + " FROM " + table + " WHERE " + BaseColumns._ID + "=" + rowID, null);
@@ -122,7 +160,12 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return result;
     }
 
-    // Return row IDs of all records matching the given selection criteria
+    /**
+     * Return row IDs of all records matching the given selection criteria
+     * @param table
+     * @param criteria any valid SQL expression
+     * @return cursor for the selected data
+     */
     public Cursor selectRecords (String table, String criteria) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("SELECT " + BaseColumns._ID + " FROM " + table + " WHERE " + criteria, null);
@@ -130,6 +173,16 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return res;
     }
 
+    /**
+     * Create a new DB record
+     * @param pLat
+     * @param pLong
+     * @param pType
+     * @param pSubtype
+     * @param pComment
+     * @param pFlag
+     * @return row ID of new record or -1, if an error occurred
+     */
     public long insertTree(double pLat, double pLong, String pType, String pSubtype, String pComment, int pFlag) {
         Log.d(MapsActivity.APP_NAME, "InsertTree");
         SQLiteDatabase db = this.getWritableDatabase();
@@ -146,6 +199,16 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return db.insert(TABLE_TREES, null, contentValues);
     }
 
+    /**
+     * Update a DB record with the given values
+     * @param table
+     * @param rowID
+     * @param type
+     * @param subtype
+     * @param comment
+     * @param flag
+     * @return true, if record was updated
+     */
     public boolean updateRow (String table, long rowID, String type, String subtype, String comment, int flag){
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -162,6 +225,14 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return (1 == modifiedRows);
     }
 
+    /**
+     * Update a DB record with the given values
+     * @param table
+     * @param rowID
+     * @param lat
+     * @param lng
+     * @return true, if record was updated
+     */
     public boolean updateRow (String table, long rowID, double lat, double lng){
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -176,12 +247,22 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return (1 == modifiedRows);
     }
 
+    /**
+     * Delete the specified DB record
+     * @param table
+     * @param rowID
+     * @return true, if record was deleted
+     */
     public boolean deleteRow(String table, long rowID) {
         SQLiteDatabase db = this.getWritableDatabase();
         int deletedRows = db.delete(table, "_id=" + rowID, null);
         return (1 == deletedRows);
     }
 
+    /**
+     * Dump all records from a table to log
+     * @param tableName
+     */
     public void dumpTable(String tableName) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("SELECT * FROM " + tableName, null);
@@ -202,6 +283,9 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         Log.d(MapsActivity.APP_NAME, sb.toString());
     }
 
+    /**
+     * Add test records to the DB
+     */
     public void populateDB() {
         Log.d(MapsActivity.APP_NAME, "populateDB");
 
@@ -210,6 +294,9 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         insertTree(47.5573659, -122.2729869, "Pear", "Seckel", "Very tasty aldf alsdkfj aldskfj aslfk lk l ladkjf l aldkfj  ladkf l aldkfj lak", 7);
     }
 
+    /**
+     * Delete existing DB and recreate an empty DB.
+     */
     public void flushDB() {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(SQL_DELETE_TREES);

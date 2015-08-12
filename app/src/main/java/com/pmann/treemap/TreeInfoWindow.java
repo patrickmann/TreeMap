@@ -1,5 +1,3 @@
-// Adapter to show a custom InfoWindow when the user taps a marker.
-
 package com.pmann.treemap;
 
 import android.annotation.SuppressLint;
@@ -11,6 +9,9 @@ import android.widget.TextView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 
+/**
+ * Adapter to show a custom InfoWindow when the user taps a marker.
+ */
 class TreeInfoWindow implements GoogleMap.InfoWindowAdapter {
     final private View mView;
 

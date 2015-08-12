@@ -1,5 +1,3 @@
-// Class to manage a Google map API client with the associated markers
-
 package com.pmann.treemap;
 
 import android.database.Cursor;
@@ -20,12 +18,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.Set;
 import java.util.TreeSet;
 
+/**
+ * Manage a Google map API client with its associated markers
+ * <p>A singleton instance of this class is made available through {@code MapsActivity.getMap()}</p>
+ */
 public class Map {
     final private GoogleApiClient mGoogleApiClient;
     final private MapsActivity mMapsActivity;
     private GoogleMap mMap;
 
-    // These settings will give you updates at the maximal rates currently possible
+    // Settings to determine location update frequency and desired accuracy
     private static final LocationRequest REQUEST = LocationRequest.create()
             .setInterval(10000)         // 10 seconds
             .setFastestInterval(500)    // 500ms
@@ -39,6 +41,11 @@ public class Map {
     // flag settings.
     private static ArrayMap<Marker, Integer> mFlagMap = null;
 
+    /**
+     * Determine which DB record corresponds to a given marker
+     * @param pMarker the selected marker
+     * @return row ID of the corresponding DB record, or -1 if not found
+     */
     public static long getRowID(Marker pMarker) {
         long result = -1;
         if (mMarkerMap != null) {
@@ -51,21 +58,26 @@ public class Map {
         return result;
     }
 
-    public Map(MapsActivity pMapsActivity) {
+    /**
+     * Initialize the map with callbacks, markers, etc. Set an initial zoom level
+     * and show the current location on the map.
+     * @param pMapsActivity the associated view object
+     * @param pMap the GoogleMap object
+     */
+    public Map(MapsActivity pMapsActivity, GoogleMap pMap) {
         mMapsActivity = pMapsActivity;
+        mMap = pMap;
+
         mGoogleApiClient = new GoogleApiClient.Builder(mMapsActivity)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(mMapsActivity)
                 .addOnConnectionFailedListener(mMapsActivity)
                 .build();
+        mGoogleApiClient.connect();
         mMarkerMap = new ArrayMap<>();
         mFlagMap = new ArrayMap<>();
-    }
 
-    public void init(GoogleMap pMap) {
-        mMap = pMap;
         mMap.moveCamera(CameraUpdateFactory.zoomTo(14));
-
         mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
         mMap.setInfoWindowAdapter(new TreeInfoWindow(mMapsActivity.getApplicationContext()));
@@ -74,7 +86,9 @@ public class Map {
         createMarkers();
     }
 
-    // Call this to receive continuous location updates via the MapsActivity.onLocationChanged() callback
+    /**
+     * Call this to receive continuous location updates via the {@code MapsActivity.onLocationChanged()} callback
+     */
     @SuppressWarnings("unused")
     public void requestLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(
@@ -91,6 +105,16 @@ public class Map {
         mGoogleApiClient.connect();
     }
 
+    /**
+     * Create a map marker and add it to the internal management data structures
+     * @param pRowID DB record ID
+     * @param pLat latitude
+     * @param pLng longitude
+     * @param pType type of tree - this can be any string
+     * @param pSubtype subtype of tree - this can be any string
+     * @param pComment another string field for comments, etc.
+     * @param pFlag bit vector that encodes up to 32 flag settings. See DBHelper class for details.
+     */
     public void addMarker(
             long pRowID, double pLat, double pLng, String pType, String pSubtype, String pComment, int pFlag) {
         Marker marker = mMap.addMarker(new MarkerOptions()
@@ -102,6 +126,9 @@ public class Map {
         mFlagMap.put(marker, pFlag);    //save flag value for efficient filtering
     }
 
+    /**
+     * Loop through the DB and create a marker for each record
+     */
     private void createMarkers() {
         Cursor cursor = DB.helper().getValues(
                 DBHelper.TABLE_TREES, DBHelper.COLUMN_LAT, DBHelper.COLUMN_LONG,
@@ -116,21 +143,32 @@ public class Map {
         cursor.close();
     }
 
+    /**
+     * Get the last known latitude and longitude
+     * @return location, or null if it could not be determined
+     */
     public Location getCurrentLocation() {
+        Log.d(MapsActivity.APP_NAME, "getCurrentLocation()");
         Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (loc == null)
             Log.e(MapsActivity.APP_NAME, "Failed to get location");
         return loc;
     }
 
+    /**
+     * Move the Google Maps view to the last known location
+     */
     public void moveToLastLocation() {
-        Location loc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        Location loc = getCurrentLocation();
         if (loc != null)
             mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(loc.getLatitude(), loc.getLongitude())));
-        else
-            Log.e(MapsActivity.APP_NAME, "getLastLocation() failed");
     }
 
+    /**
+     * Ensure that a given set of markers is turned on. Note that we don't adjust the map
+     * view so they may not actually be currently displayed.
+     * @param rowIDs set of markers to be made visible
+     */
     public void setVisible(TreeSet<Long> rowIDs) {
         if (rowIDs == null) return; // ignore - probably a result of a typo in the entry form
 
@@ -141,6 +179,11 @@ public class Map {
         }
     }
 
+    /**
+     * Turn on markers that meet the given filter criteria; turn off all others. Note that we don't adjust the map
+     * view here.
+     * @param flagFilter bit vector that encodes the desired criteria. See DBHelper class for details.
+     */
     public void setVisible(int flagFilter) {
         if (flagFilter == 0 || flagFilter == 0xFFFF) return;
 
@@ -152,6 +195,9 @@ public class Map {
         }
     }
 
+    /**
+     * Make all markers visible, regardless of filter criteria
+     */
     public void showAll() {
         for (Marker m : mMarkerMap.keySet()) {
             m.setVisible(true);

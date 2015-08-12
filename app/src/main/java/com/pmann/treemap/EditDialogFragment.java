@@ -1,6 +1,3 @@
-// This dialog opens when the user taps on the InfoWindow of a map marker. The user can modify the
-// existing DB record or delete it.
-
 package com.pmann.treemap;
 
 import android.annotation.SuppressLint;
@@ -22,6 +19,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
+/**
+ * This dialog opens when the user taps on the InfoWindow of a map marker. The user can modify the
+ * existing DB record or delete it.
+ */
 public class EditDialogFragment extends DialogFragment {
     private Location mLoc;
 
