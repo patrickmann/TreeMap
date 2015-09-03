@@ -11,3 +11,4 @@ This is a sample project to familiarize myself with the Android platform. Don't 
 
 ## Installation
 You'll need your own Google Maps API key in order to run this. You can get it free at https://console.developers.google.com/.
+Alternatively, install the app from the Google Play Store: https://play.google.com/store/apps/details?id=com.pmann.treemap
