@@ -24,6 +24,7 @@ import com.google.android.gms.maps.model.Marker;
  * existing DB record or delete it.
  */
 public class EditDialogFragment extends DialogFragment {
+    private AlertDialog mDialog;
     private Location mLoc;
 
     private Marker mMarker;
@@ -69,7 +70,7 @@ public class EditDialogFragment extends DialogFragment {
         btn_relocate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mLoc = MapsActivity.getMap().getCurrentLocation();
+                mLoc = MapsActivity.getMap().getAdjustedLocation();
                 if (mLoc != null) {
                     double lat = mLoc.getLatitude();
                     double lng = mLoc.getLongitude();
@@ -80,7 +81,11 @@ public class EditDialogFragment extends DialogFragment {
                         simpleToast("Update failed!");
                         Log.e(MapsActivity.APP_NAME, "DB failure: location update");
                     }
+                }else {
+                    simpleToast("Update failed!");
+                    Log.e(MapsActivity.APP_NAME, "DB failure: location update");
                 }
+                mDialog.dismiss();
             }
         });
 
@@ -130,7 +135,8 @@ public class EditDialogFragment extends DialogFragment {
                     }
                 });
 
-        return builder.create();
+        mDialog = builder.create();
+        return mDialog;
     }
 
     private void simpleToast(String msg) {

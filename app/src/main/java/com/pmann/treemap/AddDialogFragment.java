@@ -42,43 +42,47 @@ public class AddDialogFragment extends DialogFragment {
                 .setTitle(R.string.create)
 
                 .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        String newType = type.getText().toString();
-                        String newSubtype = subtype.getText().toString();
-                        String newComment = comment.getText().toString();
+                            public void onClick(DialogInterface dialog, int id) {
+                                String newType = type.getText().toString();
+                                String newSubtype = subtype.getText().toString();
+                                String newComment = comment.getText().toString();
 
-                        int flag = 0;
-                        if (cbShortlist.isChecked()) flag |= DBHelper.MASK_SHORTLIST;
-                        if (cbFollowup.isChecked()) flag |= DBHelper.MASK_FOLLOWUP;
-                        if (cbHarvest.isChecked()) flag |= DBHelper.MASK_HARVEST;
-                        if (cbPrune.isChecked()) flag |= DBHelper.MASK_PRUNE;
-                        if (cbScion.isChecked()) flag |= DBHelper.MASK_SCION;
+                                int flag = 0;
+                                if (cbShortlist.isChecked()) flag |= DBHelper.MASK_SHORTLIST;
+                                if (cbFollowup.isChecked()) flag |= DBHelper.MASK_FOLLOWUP;
+                                if (cbHarvest.isChecked()) flag |= DBHelper.MASK_HARVEST;
+                                if (cbPrune.isChecked()) flag |= DBHelper.MASK_PRUNE;
+                                if (cbScion.isChecked()) flag |= DBHelper.MASK_SCION;
 
-                        Location loc = MapsActivity.getMap().getCurrentLocation();
-                        if (loc != null) {
-                            double lat = loc.getLatitude();
-                            double lng = loc.getLongitude();
-                            long newRowID = DB.helper().insertTree(lat, lng, newType, newSubtype, newComment, flag);
+                                Location loc = MapsActivity.getMap().getAdjustedLocation();
+                                if (loc == null) {
+                                    simpleToast("Creation failed!");
+                                    Log.e(MapsActivity.APP_NAME, "Failed to get location!");
+                                    return;
+                                }
 
-                            if (newRowID != -1) {
-                                simpleToast("New record added");
-                                MapsActivity.getMap().addMarker(newRowID, lat, lng, newType, newSubtype, newComment, flag);
-                            } else {
-                                simpleToast("Creation failed!");
-                                Log.e(MapsActivity.APP_NAME, "DB failure: insert");
+                                double lat = loc.getLatitude();
+                                double lng = loc.getLongitude();
+                                long newRowID = DB.helper().insertTree(lat, lng, newType, newSubtype, newComment, flag);
+
+                                if (newRowID != -1) {
+                                    simpleToast("New record added");
+                                    MapsActivity.getMap().addMarker(newRowID, lat, lng, newType, newSubtype, newComment, flag);
+                                } else {
+                                    simpleToast("Creation failed!");
+                                    Log.e(MapsActivity.APP_NAME, "DB failure: insert");
+                                }
                             }
-                        } else {
-                            simpleToast("Creation failed!");
-                            Log.e(MapsActivity.APP_NAME, "Failed to get location!");
                         }
-                    }
-                })
+                )
 
                 .setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog - do nothing
-                    }
-                });
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog - do nothing
+                            }
+                        }
+
+                );
 
         return builder.create();
     }

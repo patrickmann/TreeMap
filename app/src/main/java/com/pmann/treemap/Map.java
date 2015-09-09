@@ -15,6 +15,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -43,6 +44,7 @@ public class Map {
 
     /**
      * Determine which DB record corresponds to a given marker
+     *
      * @param pMarker the selected marker
      * @return row ID of the corresponding DB record, or -1 if not found
      */
@@ -61,8 +63,9 @@ public class Map {
     /**
      * Initialize the map with callbacks, markers, etc. Set an initial zoom level
      * and show the current location on the map.
+     *
      * @param pMapsActivity the associated view object
-     * @param pMap the GoogleMap object
+     * @param pMap          the GoogleMap object
      */
     public Map(MapsActivity pMapsActivity, GoogleMap pMap) {
         mMapsActivity = pMapsActivity;
@@ -107,13 +110,14 @@ public class Map {
 
     /**
      * Create a map marker and add it to the internal management data structures
-     * @param pRowID DB record ID
-     * @param pLat latitude
-     * @param pLng longitude
-     * @param pType type of tree - this can be any string
+     *
+     * @param pRowID   DB record ID
+     * @param pLat     latitude
+     * @param pLng     longitude
+     * @param pType    type of tree - this can be any string
      * @param pSubtype subtype of tree - this can be any string
      * @param pComment another string field for comments, etc.
-     * @param pFlag bit vector that encodes up to 32 flag settings. See DBHelper class for details.
+     * @param pFlag    bit vector that encodes up to 32 flag settings. See DBHelper class for details.
      */
     public void addMarker(
             long pRowID, double pLat, double pLng, String pType, String pSubtype, String pComment, int pFlag) {
@@ -145,6 +149,7 @@ public class Map {
 
     /**
      * Get the last known latitude and longitude
+     *
      * @return location, or null if it could not be determined
      */
     public Location getCurrentLocation() {
@@ -153,6 +158,27 @@ public class Map {
         if (loc == null)
             Log.e(MapsActivity.APP_NAME, "Failed to get location");
         return loc;
+    }
+
+    /**
+     * Get last known location,  but adjust if necessary to prevent collision with locations
+     * already stored in the database.
+     *
+     * @return current (adjusted) location; or null, in case of error
+     */
+    public Location getAdjustedLocation() {
+        Location loc = getCurrentLocation();
+        if (loc == null)
+            return loc;
+
+        // Note that when we adjust for a collision, we may end up causing a new collision.
+        // So we must disambiguate repeatedly until we succeed, or until we time out.
+        for (int i = 1; i <= 3; i++)
+            if (makeUnique(loc))
+                return loc;             //location is unique
+
+        Log.e(MapsActivity.APP_NAME, "Failed to make location unique");
+        return null;                    //failed to make location unique
     }
 
     /**
@@ -167,6 +193,7 @@ public class Map {
     /**
      * Ensure that a given set of markers is turned on. Note that we don't adjust the map
      * view so they may not actually be currently displayed.
+     *
      * @param rowIDs set of markers to be made visible
      */
     public void setVisible(TreeSet<Long> rowIDs) {
@@ -182,6 +209,7 @@ public class Map {
     /**
      * Turn on markers that meet the given filter criteria; turn off all others. Note that we don't adjust the map
      * view here.
+     *
      * @param flagFilter bit vector that encodes the desired criteria. See DBHelper class for details.
      */
     public void setVisible(int flagFilter) {
@@ -204,4 +232,34 @@ public class Map {
         }
     }
 
+    /**
+     * Ensure that the provided location does not correspond to any existing marker. If
+     * necessary, add a small random offset.
+     *
+     * @param loc location
+     * @return false if location needed to be adjusted; true if it was already unique.
+     */
+    final private static double LOC_OFFSET = 0.00005;
+    final private Random mRandom = new Random(); //don't care about seed for this application
+
+    private boolean makeUnique(Location loc) {
+        StringBuilder crit = new StringBuilder();
+        crit.append(DBHelper.COLUMN_LAT).append('=').append(loc.getLatitude());
+        crit.append(" AND ").append(DBHelper.COLUMN_LONG).append('=').append(loc.getLongitude());
+        Cursor cursor = DB.helper().selectRecords(DBHelper.TABLE_TREES, crit.toString());
+
+        if (cursor.getCount() == 0)
+            return true;    //no collision, no adjustment
+
+        double rndFactorLat = mRandom.nextDouble() * (mRandom.nextBoolean()? 1 : -1);
+        double offsetLat = LOC_OFFSET * rndFactorLat;
+
+        double rndFactorLong = mRandom.nextDouble() * (mRandom.nextBoolean()? 1 : -1);
+        double offsetLong = LOC_OFFSET * rndFactorLong;
+
+        loc.setLatitude(loc.getLatitude() + offsetLat);
+        loc.setLongitude(loc.getLongitude() + offsetLong);
+
+        return false;   //location was not unique and needed to be adjusted
+    }
 }
